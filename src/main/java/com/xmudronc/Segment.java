@@ -1,8 +1,6 @@
 package com.xmudronc;
 
 public class Segment {
-    private Boolean bottom;
-    private Boolean prevbottom;
     private Integer x;
     private Integer y;
     private Integer prevx;
@@ -11,33 +9,21 @@ public class Segment {
     private Segment next;
 
     public Segment() {
-        this.bottom = false;
-        this.prevbottom = true;
-        this.x = 2;
-        this.y = 1;
-        this.prevx = 2;
-        this.prevy = 1;
+        this.x = 5;
+        this.y = 2;
+        this.prevx = 3;
+        this.prevy = 2;
         this.prev = null;
         this.next = null;
     }
 
-    public Segment(Boolean bottom, Integer x, Integer y) {
-        this.bottom = bottom;
-        this.prevbottom = !bottom;
+    public Segment(Integer x, Integer y) {
         this.x = x;
         this.y = y;
-        this.prevx = x;
-        this.prevy = y;
+        this.prevx = null;
+        this.prevy = null;
         this.prev = null;
         this.next = null;
-    }
-
-    public Boolean getBottom() {
-        return this.bottom;
-    }
-
-    public Boolean getPrevBottom() {
-        return this.prevbottom;
     }
 
     public Integer getX() {
@@ -64,11 +50,6 @@ public class Segment {
         return this.next;
     }
 
-    public void setBottom(Boolean bottom) {
-        this.prevbottom = this.bottom;
-        this.bottom = bottom;
-    }
-
     public void setX(Integer x) {
         this.prevx = this.x;
         this.x = x;
@@ -85,5 +66,16 @@ public class Segment {
 
     public void setNext(Segment next) {
         this.next = next;
+    }    
+
+    public void addSegment(Segment newSeg) {
+        if (next != null) {
+            this.next.addSegment(newSeg);
+        } else {
+            this.next = newSeg;
+            this.next.setPrev(this);
+            this.next.setX(this.next.getPrev().getPrevX());
+            this.next.setY(this.next.getPrev().getPrevY());
+        }
     }
 }
