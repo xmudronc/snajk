@@ -28,4 +28,22 @@ public class Point {
     public Integer getValue() {
         return this.value;
     }
+
+    @Override
+    public boolean equals(Object o) {  
+        if (o == this) { 
+            return true; 
+        } 
+        
+        if (!(o instanceof Point)) { 
+            return false; 
+        } 
+         
+        Point c = (Point) o; 
+        if (this.getX() == c.getX() && this.getY() == c.getY()) {
+            return true;
+        } else {
+            return false;
+        }
+    } 
 }

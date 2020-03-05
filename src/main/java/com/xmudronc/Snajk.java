@@ -5,12 +5,14 @@ package com.xmudronc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 public class Snajk {
+    private Integer score = 0;
     private ArrayList<Point> food = new ArrayList<>();
     private Terminal terminal;
     private Boolean running = false;
@@ -137,35 +139,60 @@ public class Snajk {
         }
     }
 
-    public void checkCollisionFood() {
+    public Boolean checkCollisionFood() {
+        Point toRemove = null;
         for (Point _point : food) {
-            if (mainSegment.getX().equals(_point.getX()) && mainSegment.getY().equals(_point.getY())) {
+            if (mainSegment.getX() == _point.getX() && mainSegment.getY() == _point.getY()) {
                 mainSegment.addSegment(new Segment());
-                System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
-                System.out.print("ADDSEG");
+                this.score += _point.getValue();
+                System.out.print(String.format("%c[%d;%df", 0x1B, width, 1));
+                System.out.print("SCR:" + this.score);
+                toRemove = _point;
+                break;
             }
         }
+        if (toRemove != null) {
+            food.remove(toRemove);
+        }
+        if (food.size() == 0) {
+            gwin();
+        }
+        return true;
     }
 
     public Boolean checkCollisionSelf(Segment segment) {
         if (segment != null) {
             if (segment.getX().equals(mainSegment.getX()) && segment.getY().equals(mainSegment.getY())) {
-                return false;
+                return true;
             } else {
                 if (segment.getNext() != null) {
                     return checkCollisionSelf(segment.getNext());
                 } else {
-                    return true;
+                    return false;
                 }
             }
         } else {
-            return true;
+            return false;
         }
     }
 
     public void gover() {
         System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
         System.out.print("GOVER");
+        running = false;        
+        try {
+            terminal.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.input.interrupt();
+        this.move.interrupt();
+        System.exit(0);
+    }
+
+    public void gwin() {
+        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
+        System.out.print("GWIN");
         running = false;        
         try {
             terminal.close();
@@ -184,8 +211,12 @@ public class Snajk {
                 || segment.getY() >= height) {
             return false;
         } else {
-            checkCollisionFood();
-            return checkCollisionSelf(mainSegment.getNext());
+            Boolean selfCollision = checkCollisionSelf(mainSegment.getNext());
+            if (selfCollision) {
+                return false;
+            } else {
+                return checkCollisionFood();
+            }
         }
     }
 
@@ -237,16 +268,28 @@ public class Snajk {
             }
             System.out.println();
         }
-        //DEBUG ONLY points
-        food.add(new Point(11, 11));
-        System.out.print(String.format("%c[%d;%df", 0x1B, 11, 11));
-        System.out.print(BLOCK);
-        food.add(new Point(21, 21));
-        System.out.print(String.format("%c[%d;%df", 0x1B, 21, 21));
-        System.out.print(BLOCK);
-        food.add(new Point(31, 31));
-        System.out.print(String.format("%c[%d;%df", 0x1B, 31, 31));
-        System.out.print(BLOCK);
+        generatePoints();
+    }
+
+    public boolean startCollision(Point point) {
+        if (((point.getX() == 3) || (point.getX() == 5)) && (point.getY() == 2)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void generatePoints() {
+        while (food.size() < (this.width*this.height)*0.1) {
+            Integer x = new Random().nextInt(this.width*2 - 4) + 2;
+            Integer y = new Random().nextInt(this.height - 2) + 2;
+            Point newPoint = new Point(x, y);
+            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
+                food.add(newPoint);
+                System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
+                System.out.print("\u001B[33m" + BLOCK);
+            }
+        }
     }
 
     public static void main(String[] args) {
