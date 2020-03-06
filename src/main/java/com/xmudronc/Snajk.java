@@ -13,6 +13,9 @@ import org.jline.utils.NonBlockingReader;
 
 public class Snajk {
     private Integer score = 0;
+    private Integer multiplier = 1;
+    private Integer multiplierPickupCount = 0;
+    private Boolean comboMeterRunning = false;
     private ArrayList<Point> food = new ArrayList<>();
     private Terminal terminal;
     private Boolean running = false;
@@ -21,8 +24,22 @@ public class Snajk {
     private Integer width = 20;
     private Integer height = 20;
     private final String BLOCK = "\u2588\u2588";
+    private final String FOOD = "\u2588\u2588";
     private final String EMPTY = "  ";
     private Segment mainSegment;
+    private Thread combo;
+    private Thread comboMeter = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                comboMeterRunning = true;
+                Thread.sleep(5000);
+                multiplierPickupCount = 0;
+                multiplier = 1;
+                comboMeterRunning = false;
+            } catch (InterruptedException e) {}
+        }
+    });
     private Thread input = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -139,20 +156,31 @@ public class Snajk {
         }
     }
 
+    public void comboInit() {
+        multiplierPickupCount++;
+        if (multiplierPickupCount % 5 == 0) {
+            multiplier++;
+        }
+        if (comboMeterRunning) {
+            combo.interrupt();
+        }
+        combo = new Thread(comboMeter);
+        combo.start();
+    }
+
     public Boolean checkCollisionFood() {
         Point toRemove = null;
         for (Point _point : food) {
             if (mainSegment.getX() == _point.getX() && mainSegment.getY() == _point.getY()) {
                 mainSegment.addSegment(new Segment());
-                this.score += _point.getValue();
-                System.out.print(String.format("%c[%d;%df", 0x1B, width, 1));
-                System.out.print("SCR:" + this.score);
+                this.score += _point.getValue() * this.multiplier;
                 toRemove = _point;
                 break;
             }
         }
         if (toRemove != null) {
             food.remove(toRemove);
+            comboInit();
         }
         if (food.size() == 0) {
             gwin();
@@ -205,8 +233,10 @@ public class Snajk {
     }
 
     public boolean checkMove(Segment segment) {
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 1));
-        System.out.print(mainSegment.getX() + " " + mainSegment.getY());
+        /*System.out.print(String.format("%c[%d;%df", 0x1B, 1, 1));
+        System.out.print(mainSegment.getX() + " " + mainSegment.getY());*/
+        System.out.print(String.format("%c[%d;%df", 0x1B, width, 1));
+        System.out.print("SCR:" + this.score + " MLT: " + this.multiplier + "x");
         if (segment.getX() <= 2 || segment.getX() >= (width*2)-2 || segment.getY() <= 1
                 || segment.getY() >= height) {
             return false;
@@ -227,7 +257,11 @@ public class Snajk {
 
     public void printSegment(Segment segment) {
         if (segment != null) {
-            printToXY(segment.getX(), segment.getY(), "\u001B[32m" + BLOCK, "fgr", "bgr");
+            String col = "\u001B[32m";
+            if (segment == mainSegment) {
+                col = "\u001B[34m";
+            }
+            printToXY(segment.getX(), segment.getY(), col + BLOCK, "fgr", "bgr");
             if (segment.getNext() != null) {
                 Segment next = segment.getNext();
                 next.setX(segment.getPrevX());
@@ -287,7 +321,7 @@ public class Snajk {
             if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
                 food.add(newPoint);
                 System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
-                System.out.print("\u001B[33m" + BLOCK);
+                System.out.print("\u001B[33m" + FOOD);
             }
         }
     }
