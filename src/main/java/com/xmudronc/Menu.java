@@ -76,8 +76,9 @@ public class Menu {
         snajk.init();
     }
 
-    public void scoreSelected() {
-
+    public void scoreSelected() throws IOException {
+        HighScore highScore = new HighScore(this.terminal, this.reader, this.width, this.height);
+        highScore.init();
     }
 
     public void exitSelected() throws IOException {
