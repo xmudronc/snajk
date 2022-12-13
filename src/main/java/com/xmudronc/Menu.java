@@ -8,6 +8,7 @@ import org.jline.utils.NonBlockingReader;
 
 public class Menu {
     private Terminal terminal;
+    private NonBlockingReader reader;
     private Integer width = 20;
     private Integer height = 20;
     private Option selectedOption;
@@ -15,9 +16,7 @@ public class Menu {
     private Thread input = new Thread(new Runnable() {
         @Override
         public void run() {
-            NonBlockingReader reader;
             try {
-                reader = terminal.reader();
                 if (reader != null) {
                     while (running) {
                         Integer value = reader.read();
@@ -26,7 +25,6 @@ public class Menu {
                         }
                         moveCursor(value);
                     }
-                    reader.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -73,28 +71,30 @@ public class Menu {
     }
     
     public void snajkSelected() throws IOException {
-        Snajk snajk = new Snajk(this.terminal, this.width, this.height);
+        Snajk snajk = new Snajk(this.terminal, this.reader, this.width, this.height);
         snajk.init();
     }
 
     public void scoreSelected() {
-        
+
     }
 
     public void exitSelected() throws IOException {
         running = false;
         terminal.close();
+        reader.close();
         System.exit(0);
     }
 
     public void init() throws IOException {
+        terminal = TerminalBuilder.builder().build();
+        terminal.enterRawMode();
+        reader = terminal.reader();
         drawBorder();
         drawMenu();
     }
 
     public void drawBorder() throws IOException {
-        terminal = TerminalBuilder.builder().build();
-        terminal.enterRawMode();
         Integer w = terminal.getWidth();
         Integer h = terminal.getHeight();
         Integer res = w<h?w:h;

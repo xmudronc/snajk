@@ -16,6 +16,7 @@ public class Snajk {
     private Integer multiplierPickupCount = 0;
     private Boolean comboMeterRunning = false;
     private ArrayList<Point> food = new ArrayList<>();
+    private NonBlockingReader reader;
     private Terminal terminal;
     private Boolean running = false;
     private String direction = "N";
@@ -39,9 +40,7 @@ public class Snajk {
     private Thread input = new Thread(new Runnable() {
         @Override
         public void run() {
-            NonBlockingReader reader;
             try {
-                reader = terminal.reader();
                 if (reader != null) {
                     while (running) {
                         Integer value = reader.read();
@@ -50,10 +49,9 @@ public class Snajk {
                         }
                         if (value == 113 || value == 27) {
                             running = false;
-                            reader.close();
-                            terminal.close();
                             move.interrupt();
-                            System.exit(0);
+                            Menu menu = new Menu();
+                            menu.init();
                         } else {
                             move(value);
                         }
@@ -125,8 +123,9 @@ public class Snajk {
         }
     });
 
-    public Snajk(Terminal terminal, Integer width, Integer height) {
+    public Snajk(Terminal terminal, NonBlockingReader reader, Integer width, Integer height) {
         this.terminal = terminal;
+        this.reader = reader;
         this.width = width;
         this.height = height;
     }
