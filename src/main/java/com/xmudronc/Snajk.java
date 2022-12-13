@@ -166,7 +166,7 @@ public class Snajk {
         combo.start();
     }
 
-    public Boolean checkCollisionFood() {
+    public Boolean checkCollisionFood() throws IOException {
         Point toRemove = null;
         for (Point _point : food) {
             if (mainSegment.getX() == _point.getX() && mainSegment.getY() == _point.getY()) {
@@ -181,7 +181,7 @@ public class Snajk {
             comboInit();
         }
         if (food.size() == 0) {
-            gwin();
+            gover();
         }
         return true;
     }
@@ -208,21 +208,7 @@ public class Snajk {
         menu.init(terminal, reader); 
     }
 
-    public void gwin() {
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
-        System.out.print("GWIN");
-        running = false;        
-        try {
-            terminal.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.input.interrupt();
-        this.move.interrupt();
-        System.exit(0);
-    }
-
-    public boolean checkMove(Segment segment) {
+    public boolean checkMove(Segment segment) throws IOException {
         /*System.out.print(String.format("%c[%d;%df", 0x1B, 1, 1));
         System.out.print(mainSegment.getX() + " " + mainSegment.getY());*/
 
