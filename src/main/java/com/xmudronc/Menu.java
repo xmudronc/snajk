@@ -99,6 +99,45 @@ public class Menu {
         System.exit(0);
     }
 
+    private void drawLogArea() {
+        Integer w = terminal.getWidth();
+        for (Integer y = 1; y < height+1; y++) {
+            for (Integer x = (width*2)+3; x < w-2; x++) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, x));
+                if (y == 1 || y == height) {
+                    if (x <= (width*2)+4) {
+                        System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+                    } else {
+                        System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+                    }
+                } else {
+                    if (x == (width*2)+5 || x == (width*2)+6 || x == w-2 || x == w-3) {
+                        System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+                    } else {
+                        System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+                    }
+                }
+            }
+            if (y != 1) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, w-1));
+                System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            } else {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, w-1));
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            }
+            System.out.println();
+        }    
+        for (Integer x = (width*2)+3; x < w; x++) {
+            System.out.print(String.format("%c[%d;%df", 0x1B, height+1, x));
+            if (x <= (width*2)+6) {
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            } else {
+                System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            }
+        } 
+        System.out.print("\u001B[0m"); 
+    }
+
     public void init() throws IOException {
         terminal = TerminalBuilder.builder().build();
         terminal.enterRawMode();
@@ -106,6 +145,7 @@ public class Menu {
         clearGameArea();
         drawBorder();
         drawMenu();
+        drawLogArea();
     }
 
     public void init(Terminal terminal, NonBlockingReader reader) throws IOException {
