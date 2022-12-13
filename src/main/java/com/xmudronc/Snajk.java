@@ -48,10 +48,7 @@ public class Snajk {
                             value += 32;
                         }
                         if (value == 113 || value == 27) {
-                            running = false;
-                            move.interrupt();
-                            Menu menu = new Menu();
-                            menu.init();
+                            gover();
                         } else {
                             move(value);
                         }
@@ -68,56 +65,56 @@ public class Snajk {
             while (running) {
                 try {
                     Thread.sleep(delay);
-                } catch (InterruptedException e) {
+                    switch (direction) {
+                        case "L":
+                            if (mainSegment.getX() > 2) {
+                                mainSegment.setY(mainSegment.getY() + 0);
+                                mainSegment.setX(mainSegment.getX() - 2);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }
+                            break;
+                        case "R":
+                            if (mainSegment.getX() < (width*2)-2) {
+                                mainSegment.setY(mainSegment.getY() + 0);
+                                mainSegment.setX(mainSegment.getX() + 2);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }    
+                            break;
+                        case "U":
+                            if (mainSegment.getY() > 1) {
+                                mainSegment.setY(mainSegment.getY() - 1);
+                                mainSegment.setX(mainSegment.getX() + 0);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }
+                            break;
+                        case "D":
+                            if (mainSegment.getY() < height) {
+                                mainSegment.setY(mainSegment.getY() + 1);
+                                mainSegment.setX(mainSegment.getX() + 0);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (InterruptedException | IOException e) {
                     System.out.print("GAME ENDED BY USER");
-                }
-                switch (direction) {
-                    case "L":
-                        if (mainSegment.getX() > 2) {
-                            mainSegment.setY(mainSegment.getY() + 0);
-                            mainSegment.setX(mainSegment.getX() - 2);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }
-                        break;
-                    case "R":
-                        if (mainSegment.getX() < (width*2)-2) {
-                            mainSegment.setY(mainSegment.getY() + 0);
-                            mainSegment.setX(mainSegment.getX() + 2);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }    
-                        break;
-                    case "U":
-                        if (mainSegment.getY() > 1) {
-                            mainSegment.setY(mainSegment.getY() - 1);
-                            mainSegment.setX(mainSegment.getX() + 0);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }
-                        break;
-                    case "D":
-                        if (mainSegment.getY() < height) {
-                            mainSegment.setY(mainSegment.getY() + 1);
-                            mainSegment.setX(mainSegment.getX() + 0);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }
-                        break;
-                    default:
-                        break;
                 }
             }
         }
@@ -205,18 +202,10 @@ public class Snajk {
         }
     }
 
-    public void gover() {
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
-        System.out.print("GOVER");
-        running = false;        
-        try {
-            terminal.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.input.interrupt();
-        this.move.interrupt();
-        System.exit(0);
+    public void gover() throws IOException {
+        running = false;
+        Menu menu = new Menu();
+        menu.init(terminal, reader); 
     }
 
     public void gwin() {

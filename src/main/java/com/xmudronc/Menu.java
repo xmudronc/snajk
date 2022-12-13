@@ -94,6 +94,13 @@ public class Menu {
         drawMenu();
     }
 
+    public void init(Terminal terminal, NonBlockingReader reader) throws IOException {
+        this.terminal = terminal;
+        this.reader = reader;
+        drawBorder();
+        drawMenu();
+    }
+
     public void drawBorder() throws IOException {
         Integer w = terminal.getWidth();
         Integer h = terminal.getHeight();
@@ -124,7 +131,7 @@ public class Menu {
     }
 
     public void prepareMenuOptions() {
-        int x = width/2;
+        int x = width;
         int y = (height/2)-3;
         Option newGame = new Option(OptionId.NEW_GAME, new Point(x, y), "New Game");
         Option highScore = new Option(OptionId.HIGH_SCORE ,new Point(x, y+2), "High Score");
