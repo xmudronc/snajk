@@ -101,10 +101,49 @@ public class Menu {
 
     private void drawLogArea() {
         Integer w = terminal.getWidth();
-        for (Integer y = 1; y < height+1; y++) {
+        for (Integer y = 11; y < height+1; y++) {
             for (Integer x = (width*2)+3; x < w-2; x++) {
                 System.out.print(String.format("%c[%d;%df", 0x1B, y, x));
-                if (y == 1 || y == height) {
+                if (y == 11 || y == height) {
+                    if (x <= (width*2)+4) {
+                        System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+                    } else {
+                        System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+                    }
+                } else {
+                    if (x == (width*2)+5 || x == (width*2)+6 || x == w-2 || x == w-3) {
+                        System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+                    } else {
+                        System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+                    }
+                }
+            }
+            if (y != 11) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, w-1));
+                System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            } else {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, w-1));
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            }
+            System.out.println();
+        }    
+        for (Integer x = (width*2)+3; x < w; x++) {
+            System.out.print(String.format("%c[%d;%df", 0x1B, height+1, x));
+            if (x <= (width*2)+6) {
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            } else {
+                System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            }
+        } 
+        System.out.print("\u001B[0m"); 
+    }
+
+    public void drawScoreArea() {
+        Integer w = terminal.getWidth();
+        for (Integer y = 1; y < 9; y++) {
+            for (Integer x = (width*2)+3; x < w-2; x++) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, x));
+                if (y == 1 || y == 8) {
                     if (x <= (width*2)+4) {
                         System.out.print("\u001B[0m" + Symbol.EMPTY.value);
                     } else {
@@ -128,13 +167,18 @@ public class Menu {
             System.out.println();
         }    
         for (Integer x = (width*2)+3; x < w; x++) {
-            System.out.print(String.format("%c[%d;%df", 0x1B, height+1, x));
+            System.out.print(String.format("%c[%d;%df", 0x1B, 9, x));
             if (x <= (width*2)+6) {
                 System.out.print("\u001B[0m" + Symbol.EMPTY.value);
             } else {
                 System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
             }
         } 
+        System.out.print("\u001B[0m"); 
+        System.out.print(String.format("%c[%d;%df", 0x1B, 3, (width*2)+9));
+        System.out.print("\u001B[37m" + "SCORE:");
+        System.out.print(String.format("%c[%d;%df", 0x1B, 6, (width*2)+9));
+        System.out.print("\u001B[37m" + "MULTIPLIER: ");
         System.out.print("\u001B[0m"); 
     }
 
@@ -146,6 +190,7 @@ public class Menu {
         drawBorder();
         drawMenu();
         drawLogArea();
+        drawScoreArea();
     }
 
     public void init(Terminal terminal, NonBlockingReader reader) throws IOException {
