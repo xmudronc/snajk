@@ -70,13 +70,24 @@ public class Menu {
                 break;
         }
     }
+
+    public void clearGameArea() {
+        for (Integer y = 2; y < height; y++) {
+            for (Integer x = 3; x < (width*2)-2; x++) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, x));
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            }
+        } 
+    }
     
     public void snajkSelected() throws IOException {
+        clearGameArea();
         Snajk snajk = new Snajk(this.terminal, this.reader, this.width, this.height);
         snajk.init();
     }
 
     public void scoreSelected() throws IOException {
+        clearGameArea();
         HighScore highScore = new HighScore(this.terminal, this.reader, this.width, this.height);
         highScore.init();
     }
@@ -92,6 +103,7 @@ public class Menu {
         terminal = TerminalBuilder.builder().build();
         terminal.enterRawMode();
         reader = terminal.reader();
+        clearGameArea();
         drawBorder();
         drawMenu();
     }
@@ -99,6 +111,7 @@ public class Menu {
     public void init(Terminal terminal, NonBlockingReader reader) throws IOException {
         this.terminal = terminal;
         this.reader = reader;
+        clearGameArea();
         drawBorder();
         drawMenu();
     }
