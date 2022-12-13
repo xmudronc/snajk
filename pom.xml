@@ -80,7 +80,7 @@
           <configuration>
             <archive>
               <manifest>
-                <mainClass>com.xmudronc.Snajk</mainClass>
+                <mainClass>com.xmudronc.Main</mainClass>
               </manifest>
             </archive>
             <descriptorRefs>

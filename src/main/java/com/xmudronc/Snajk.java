@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 public class Snajk {
@@ -21,11 +20,8 @@ public class Snajk {
     private Boolean running = false;
     private String direction = "N";
     private int delay = 150;
-    private Integer width = 20;
-    private Integer height = 20;
-    private final String BLOCK = "\u2588\u2588";
-    private final String FOOD = "\u2588\u2588";
-    private final String EMPTY = "  ";
+    private Integer width;
+    private Integer height;
     private Segment mainSegment;
     private Thread combo;
     private Thread comboMeter = new Thread(new Runnable() {
@@ -128,6 +124,12 @@ public class Snajk {
             }
         }
     });
+
+    public Snajk(Terminal terminal, Integer width, Integer height) {
+        this.terminal = terminal;
+        this.width = width;
+        this.height = height;
+    }
 
     public void move(Integer key) {
         switch (key) {
@@ -261,48 +263,29 @@ public class Snajk {
             if (segment == mainSegment) {
                 col = "\u001B[34m";
             }
-            printToXY(segment.getX(), segment.getY(), col + BLOCK, "fgr", "bgr");
+            printToXY(segment.getX(), segment.getY(), col + Symbol.BLOCK.value, "fgr", "bgr");
             if (segment.getNext() != null) {
                 Segment next = segment.getNext();
                 next.setX(segment.getPrevX());
                 next.setY(segment.getPrevY());
                 printSegment(next);
             } else {
-                printToXY(segment.getPrevX(), segment.getPrevY(), EMPTY, "fgr", "bgr");
+                printToXY(segment.getPrevX(), segment.getPrevY(), Symbol.EMPTY.value, "fgr", "bgr");
             }
         }
     }
 
-    public void start() {
-        this.running = true;
-        this.input.start();
-        this.move.start();
-    }
-
-    public void init() throws IOException {
-        terminal = TerminalBuilder.builder().build();
-        terminal.enterRawMode();
-        Integer w = terminal.getWidth();
-        Integer h = terminal.getHeight();
-        Integer res = w<h?w:h;
-        this.width = res - 1;
-        this.height = res - 1;
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 1));
-        for (Integer y = 0; y < height; y++) {
-            for (Integer x = 0; x < width; x++) {
-                if (y == 0 || y == height-1) {
-                    System.out.print("\u001B[31m" + BLOCK);
-                } else {
-                    if (x == 0 || x == width-1) {
-                        System.out.print("\u001B[31m" + BLOCK);
-                    } else {
-                        System.out.print(EMPTY);
-                    }
-                }
+    public void generatePoints() {
+        while (food.size() < (width*height)*0.1) {
+            Integer x = new Random().nextInt(width*2 - 4) + 2;
+            Integer y = new Random().nextInt(height - 2) + 2;
+            Point newPoint = new Point(x, y);
+            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
+                food.add(newPoint);
+                System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
+                System.out.print("\u001B[33m" + Symbol.FOOD.value);
             }
-            System.out.println();
         }
-        generatePoints();
     }
 
     public boolean startCollision(Point point) {
@@ -313,33 +296,21 @@ public class Snajk {
         }
     }
 
-    public void generatePoints() {
-        while (food.size() < (this.width*this.height)*0.1) {
-            Integer x = new Random().nextInt(this.width*2 - 4) + 2;
-            Integer y = new Random().nextInt(this.height - 2) + 2;
-            Point newPoint = new Point(x, y);
-            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
-                food.add(newPoint);
-                System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
-                System.out.print("\u001B[33m" + FOOD);
-            }
-        }
+    public void start() {
+        this.running = true;
+        this.input.start();
+        this.move.start();
     }
 
-    public static void main(String[] args) {
-        try {
-            Snajk snajk = new Snajk();
-            snajk.init();
-            snajk.mainSegment = new Segment(3, 2);
-            Segment initSegment = new Segment(3, 2);
-            initSegment.setPrev(snajk.mainSegment);
-            snajk.mainSegment.setNext(initSegment);
-            snajk.mainSegment.setX(5);
-            snajk.mainSegment.setY(2);
-            snajk.printSegment(snajk.mainSegment);
-            snajk.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void init() throws IOException {
+        generatePoints(); 
+        this.mainSegment = new Segment(3, 2);
+        Segment initSegment = new Segment(3, 2);
+        initSegment.setPrev(this.mainSegment);
+        this.mainSegment.setNext(initSegment);
+        this.mainSegment.setX(5);
+        this.mainSegment.setY(2);
+        this.printSegment(this.mainSegment);
+        this.start();
     }
 }
