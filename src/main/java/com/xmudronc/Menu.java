@@ -113,17 +113,27 @@ public class Menu {
         for (Integer y = 0; y < height; y++) {
             for (Integer x = 0; x < width; x++) {
                 if (y == 0 || y == height-1) {
-                    System.out.print("\u001B[31m" + Symbol.BLOCK.value);
+                    System.out.print("\u001B[41m" + Symbol.EMPTY.value);
                 } else {
                     if (x == 0 || x == width-1) {
-                        System.out.print("\u001B[31m" + Symbol.BLOCK.value);
+                        System.out.print("\u001B[41m" + Symbol.EMPTY.value);
                     } else {
-                        System.out.print(Symbol.EMPTY.value);
+                        System.out.print("\u001B[0m" + Symbol.EMPTY.value);
                     }
                 }
             }
+            if (y != 0) {
+                System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            } else {
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            }
             System.out.println();
-        }       
+        }    
+        for (Integer x = 3; x < (width*2)+3; x+=2) {
+            System.out.print(String.format("%c[%d;%df", 0x1B, height+1, x));
+            System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+        } 
+        System.out.print("\u001B[0m");  
     }
 
     public void drawMenu() {
@@ -212,7 +222,7 @@ public class Menu {
             
             System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, point.getX()-(value.length()/2)+2));
             System.out.print("\u001B[37m\u001B[41m" + value);
-
+            //reset color
             System.out.print("\u001B[0m");
         }
 
@@ -245,7 +255,7 @@ public class Menu {
             
             System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), point.getX()-(value.length()/2)));
             System.out.print("\u001B[97m\u001B[101m" + value);
-
+            //reset color
             System.out.print("\u001B[0m");
         }
     }
