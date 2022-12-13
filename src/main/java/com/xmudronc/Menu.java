@@ -11,6 +11,7 @@ public class Menu {
     private NonBlockingReader reader;
     private Integer width = 20;
     private Integer height = 20;
+    private Integer buttonWidth = 20;
     private Option selectedOption;
     private Boolean running = false;
     private Thread input = new Thread(new Runnable() {
@@ -132,10 +133,10 @@ public class Menu {
 
     public void prepareMenuOptions() {
         int x = width;
-        int y = (height/2)-3;
+        int y = (height/2)-5;
         Option newGame = new Option(OptionId.NEW_GAME, new Point(x, y), "New Game");
-        Option highScore = new Option(OptionId.HIGH_SCORE ,new Point(x, y+2), "High Score");
-        Option exit = new Option(OptionId.EXIT, new Point(x, y+4), "Exit");
+        Option highScore = new Option(OptionId.HIGH_SCORE ,new Point(x, y+5), "High Score");
+        Option exit = new Option(OptionId.EXIT, new Point(x, y+10), "Exit");
         newGame.setLinks(highScore, exit);
         highScore.setLinks(exit, newGame);
         exit.setLinks(newGame, highScore);
@@ -181,14 +182,66 @@ public class Menu {
             return this.id;
         }
 
-        public void select() {
-            System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), point.getX()-(value.length()/2)));
-            System.out.print("\u001B[34m" + value);
+        public void deselect() {
+            int startPos = point.getX()-(buttonWidth/2);
+            int endPos = point.getX()+(buttonWidth/2);
+            for (int x = startPos; x < endPos; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()-1, x));
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            }
+            
+            for (int x = startPos+2; x < endPos+2; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), x));
+                System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+            }
+            System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), startPos));
+            System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            
+            for (int x = startPos+2; x < endPos+2; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, x));
+                System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+            }
+            System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, startPos));
+            System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            
+            for (int x = startPos+2; x < endPos+2; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+2, x));
+                System.out.print("\u001B[41m" + Symbol.EMPTY.value);
+            }
+            
+            System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, point.getX()-(value.length()/2)+2));
+            System.out.print("\u001B[37m\u001B[41m" + value);
         }
 
-        public void deselect() {
+        public void select() {
+            int startPos = point.getX()-(buttonWidth/2);
+            int endPos = point.getX()+(buttonWidth/2);
+            for (int x = startPos; x < endPos; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()-1, x));
+                System.out.print("\u001B[91m\u001B[101m" + Symbol.EMPTY.value);
+            }
+            
+            for (int x = startPos; x < endPos; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), x));
+                System.out.print("\u001B[91m\u001B[101m" + Symbol.EMPTY.value);
+            }
+            System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), endPos));
+            System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            
+            for (int x = startPos; x < endPos; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, x));
+                System.out.print("\u001B[91m\u001B[101m" + Symbol.EMPTY.value);
+            }
+            System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, endPos));
+            System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            
+            for (int x = startPos+2; x < endPos+2; x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+2, x));
+                System.out.print("\u001B[30m\u001B[40m" + Symbol.BLOCK.value);
+            }
+            
             System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), point.getX()-(value.length()/2)));
-            System.out.print("\u001B[32m" + value);
+            System.out.print("\u001B[97m\u001B[101m" + value);
         }
     }
 }
