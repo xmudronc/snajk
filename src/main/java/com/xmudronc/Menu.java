@@ -212,6 +212,8 @@ public class Menu {
             
             System.out.print(String.format("%c[%d;%df", 0x1B, point.getY()+1, point.getX()-(value.length()/2)+2));
             System.out.print("\u001B[37m\u001B[41m" + value);
+
+            System.out.print("\u001B[0m");
         }
 
         public void select() {
@@ -243,6 +245,8 @@ public class Menu {
             
             System.out.print(String.format("%c[%d;%df", 0x1B, point.getY(), point.getX()-(value.length()/2)));
             System.out.print("\u001B[97m\u001B[101m" + value);
+
+            System.out.print("\u001B[0m");
         }
     }
 }
