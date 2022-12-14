@@ -224,8 +224,7 @@ public class Snajk {
         System.out.print(String.format("%c[%d;%df", 0x1B, 6, (width*2)+21));
         System.out.print("\u001B[37m" + this.multiplier + "x");
 
-        if (segment.getX() <= 2 || segment.getX() >= (width*2)-2 || segment.getY() <= 1
-                || segment.getY() >= height) {
+        if (segment.getX() <= 2 || segment.getX() >= (width*2)-2 || segment.getY() <= 1 || segment.getY() >= height-1) {
             return false;
         } else {
             Boolean selfCollision = checkCollisionSelf(mainSegment.getNext());
@@ -262,8 +261,8 @@ public class Snajk {
 
     public void generatePoints() {
         while (food.size() < (width*height)*0.1) {
-            Integer x = new Random().nextInt(width*2 - 4) + 2;
-            Integer y = new Random().nextInt(height - 2) + 2;
+            Integer x = new Random().nextInt(width*2 - 4) + 3;
+            Integer y = new Random().nextInt(height - 3) + 2;
             Point newPoint = new Point(x, y);
             if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
                 food.add(newPoint);

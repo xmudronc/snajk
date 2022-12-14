@@ -75,7 +75,16 @@ public class Menu {
 
     public void clearGameArea() {
         for (Integer y = 1; y < runSize.getRows(); y++) {
-            for (Integer x = 1; x < runSize.getRows()*2+4; x+=2) {
+            for (Integer x = 1; x < runSize.getColumns(); x+=2) {
+                System.out.print(String.format("%c[%d;%df", 0x1B, y, x));
+                System.out.print("\u001B[0m" + Symbol.EMPTY.value);
+            }
+        } 
+    }
+
+    public void clearPlayArea() {
+        for (Integer y = 2; y < runSize.getRows()-1; y++) {
+            for (Integer x = 3; x < runSize.getRows()*2-3; x+=2) {
                 System.out.print(String.format("%c[%d;%df", 0x1B, y, x));
                 System.out.print("\u001B[0m" + Symbol.EMPTY.value);
             }
@@ -83,13 +92,13 @@ public class Menu {
     }
     
     public void snajkSelected() throws IOException {
-        clearGameArea();
+        clearPlayArea();
         Snajk snajk = new Snajk(this.terminal, this.reader, this.logArea, this.startupSize, runSize.getRows(), runSize.getRows());
         snajk.init();
     }
 
     public void scoreSelected() throws IOException {
-        clearGameArea();
+        clearPlayArea();
         HighScore highScore = new HighScore(this.terminal, this.reader, this.logArea, this.startupSize, runSize.getRows(), runSize.getRows());
         highScore.init();
     }
@@ -171,6 +180,7 @@ public class Menu {
         terminal.enterRawMode();
         startupSize = terminal.getSize();
         resizeTerminal(runSize.getColumns(), runSize.getRows());
+        clearGameArea();
         reader = terminal.reader();
         logArea = new LogArea(89, 13, 26, 25);
         init(terminal, reader, logArea, startupSize);
@@ -185,7 +195,6 @@ public class Menu {
         this.reader = reader;
         this.logArea = logArea;
         this.startupSize = startupSize;
-        clearGameArea();
         drawGameArea();
         drawMenu();
     }
