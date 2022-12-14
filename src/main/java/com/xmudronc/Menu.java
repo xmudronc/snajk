@@ -195,6 +195,7 @@ public class Menu {
         this.reader = reader;
         this.logArea = logArea;
         this.startupSize = startupSize;
+        clearPlayArea();
         drawGameArea();
         drawMenu();
     }

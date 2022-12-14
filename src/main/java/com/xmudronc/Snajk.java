@@ -289,12 +289,12 @@ public class Snajk {
     public void init() throws IOException {
         logArea.printToLogOverwritable("GAME STARTED");
         generatePoints(); 
-        this.mainSegment = new Segment(3, 2);
-        Segment initSegment = new Segment(3, 2);
+        this.mainSegment = new Segment(width-1, height/2);
+        Segment initSegment = new Segment(width-1, height/2);
         initSegment.setPrev(this.mainSegment);
         this.mainSegment.setNext(initSegment);
-        this.mainSegment.setX(5);
-        this.mainSegment.setY(2);
+        this.mainSegment.setX(width-3);
+        this.mainSegment.setY(height/2);
         this.printSegment(this.mainSegment);
         this.start();
     }
