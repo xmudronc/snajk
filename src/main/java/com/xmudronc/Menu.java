@@ -2,11 +2,14 @@ package com.xmudronc;
 
 import java.io.IOException;
 
+import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 public class Menu {
+    private Size startupSize;
+    private Size runSize = new Size(120, 40);
     private Terminal terminal;
     private NonBlockingReader reader;
     private Integer width = 20;
@@ -93,6 +96,7 @@ public class Menu {
     }
 
     public void exitSelected() throws IOException {
+        resizeTerminal(startupSize.getColumns(), startupSize.getRows());
         running = false;
         terminal.close();
         reader.close();
@@ -185,6 +189,8 @@ public class Menu {
     public void init() throws IOException {
         terminal = TerminalBuilder.builder().build();
         terminal.enterRawMode();
+        startupSize = terminal.getSize();
+        resizeTerminal(120, 40);
         reader = terminal.reader();
         clearGameArea();
         drawBorder();
@@ -199,6 +205,10 @@ public class Menu {
         clearGameArea();
         drawBorder();
         drawMenu();
+    }
+
+    private void resizeTerminal(Integer columns, Integer rows) {
+        System.out.print("\u001B[8;" + rows + ";" + columns + "t"); 
     }
 
     public void drawBorder() throws IOException {
