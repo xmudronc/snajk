@@ -130,6 +130,7 @@ public class Snajk {
     public void move(Integer key) {
         switch (key) {
             case 97: // a
+            case 37: // left arrow
                 if (direction != "R") {
                     direction = "L";                    
                 }

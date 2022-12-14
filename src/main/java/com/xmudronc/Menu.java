@@ -8,6 +8,7 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 public class Menu {
+    private LogArea logArea;
     private Size startupSize;
     private Size runSize = new Size(120, 40);
     private Terminal terminal;
@@ -190,12 +191,15 @@ public class Menu {
         terminal = TerminalBuilder.builder().build();
         terminal.enterRawMode();
         startupSize = terminal.getSize();
-        resizeTerminal(120, 40);
+        resizeTerminal(runSize.getColumns(), runSize.getRows());
         reader = terminal.reader();
         clearGameArea();
         drawBorder();
         drawMenu();
+        logArea = new LogArea(87, 13, 28, 25);
         drawLogArea();
+        logArea.printToLog("UP:     W or \nDOWN:   S or \nLEFT:   A or \nRIGHT:  D or \n\nSELECT: RETURN\nQUIT:   Q or ESC\n\n");
+        logArea.printToLog("----------------------------\n\n");
         drawScoreArea();
     }
 
