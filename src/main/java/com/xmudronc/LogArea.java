@@ -6,6 +6,7 @@ public class LogArea {
     private Integer safeAreaWidth;
     private Integer safeAreaHeight;
     private Cursor cursor;
+    private Integer lastPrintLength = 0;
 
     public LogArea(Integer x, Integer y, Integer widdth, Integer height) {
         this.safeAreaX = x;
@@ -17,6 +18,7 @@ public class LogArea {
 
     public void printToLog(String print) {
         if (print != null) {
+            lastPrintLength = print.length();
             Integer counterWidth = cursor.getX();
             Integer counterHeight = cursor.getY();
             for (int i = 0; i < print.length(); i++) {
@@ -42,9 +44,26 @@ public class LogArea {
         }      
     }
 
+    public void printToLogOverwritable(String print) {
+        Cursor originCursor = new Cursor(cursor);
+        StringBuilder realPrint = new StringBuilder(print);
+        if (print.length() < lastPrintLength) {
+            for (int i = 0; i < lastPrintLength-print.length(); i++) {
+                realPrint.append(" ");
+            }
+        }
+        printToLog(realPrint.toString());
+        cursor = originCursor;
+    }
+
     private class Cursor {
         private Integer x;
         private Integer y;
+
+        public Cursor(Cursor cursor) {
+            this.x = cursor.getX();
+            this.y = cursor.getY();
+        }
 
         public Cursor(Integer x, Integer y) {
             this.x = x;

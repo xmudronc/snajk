@@ -86,13 +86,13 @@ public class Menu {
     
     public void snajkSelected() throws IOException {
         clearGameArea();
-        Snajk snajk = new Snajk(this.terminal, this.reader, this.width, this.height);
+        Snajk snajk = new Snajk(this.terminal, this.reader, this.logArea, this.startupSize, this.width, this.height);
         snajk.init();
     }
 
     public void scoreSelected() throws IOException {
         clearGameArea();
-        HighScore highScore = new HighScore(this.terminal, this.reader, this.width, this.height);
+        HighScore highScore = new HighScore(this.terminal, this.reader, this.logArea, this.startupSize, this.width, this.height);
         highScore.init();
     }
 
@@ -198,14 +198,16 @@ public class Menu {
         drawMenu();
         logArea = new LogArea(87, 13, 28, 25);
         drawLogArea();
-        logArea.printToLog("UP:     W or \nDOWN:   S or \nLEFT:   A or \nRIGHT:  D or \n\nSELECT: RETURN\nQUIT:   Q or ESC\n\n");
-        logArea.printToLog("----------------------------\n\n");
+        logArea.printToLog("UP:     W\nDOWN:   S\nLEFT:   A\nRIGHT:  D\n\nSELECT: RETURN\nQUIT:   P\n\n");
+        logArea.printToLog("----------------------------\n");
         drawScoreArea();
     }
 
-    public void init(Terminal terminal, NonBlockingReader reader) throws IOException {
+    public void init(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize) throws IOException {
         this.terminal = terminal;
         this.reader = reader;
+        this.logArea = logArea;
+        this.startupSize = startupSize;
         clearGameArea();
         drawBorder();
         drawMenu();

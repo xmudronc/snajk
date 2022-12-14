@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
@@ -18,6 +19,8 @@ public class Snajk {
     private ArrayList<Point> food = new ArrayList<>();
     private NonBlockingReader reader;
     private Terminal terminal;
+    private LogArea logArea;
+    private Size startupSize;
     private Boolean running = false;
     private String direction = "N";
     private int delay = 150;
@@ -47,7 +50,7 @@ public class Snajk {
                         if (value >= 65 && value <= 90) {
                             value += 32;
                         }
-                        if (value == 113 || value == 27) {
+                        if (value == 112) {
                             gover();
                         } else {
                             move(value);
@@ -120,9 +123,11 @@ public class Snajk {
         }
     });
 
-    public Snajk(Terminal terminal, NonBlockingReader reader, Integer width, Integer height) {
+    public Snajk(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize, Integer width, Integer height) {
         this.terminal = terminal;
         this.reader = reader;
+        this.logArea = logArea;
+        this.startupSize = startupSize;
         this.width = width;
         this.height = height;
     }
@@ -130,7 +135,6 @@ public class Snajk {
     public void move(Integer key) {
         switch (key) {
             case 97: // a
-            case 37: // left arrow
                 if (direction != "R") {
                     direction = "L";                    
                 }
@@ -205,8 +209,9 @@ public class Snajk {
 
     public void gover() throws IOException {
         running = false;
+        logArea.printToLogOverwritable("GAME OVER");
         Menu menu = new Menu();
-        menu.init(terminal, reader); 
+        menu.init(terminal, reader, logArea, startupSize); 
     }
 
     public boolean checkMove(Segment segment) throws IOException {
@@ -283,6 +288,7 @@ public class Snajk {
     }
 
     public void init() throws IOException {
+        logArea.printToLogOverwritable("GAME STARTED");
         generatePoints(); 
         this.mainSegment = new Segment(3, 2);
         Segment initSegment = new Segment(3, 2);
