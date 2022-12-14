@@ -4,3 +4,4 @@ target
 .classpath
 .project
 src/test
+.DS_Store

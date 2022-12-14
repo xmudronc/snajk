@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 public class Snajk {
@@ -17,15 +17,15 @@ public class Snajk {
     private Integer multiplierPickupCount = 0;
     private Boolean comboMeterRunning = false;
     private ArrayList<Point> food = new ArrayList<>();
+    private NonBlockingReader reader;
     private Terminal terminal;
+    private LogArea logArea;
+    private Size startupSize;
     private Boolean running = false;
     private String direction = "N";
     private int delay = 150;
-    private Integer width = 20;
-    private Integer height = 20;
-    private final String BLOCK = "\u2588\u2588";
-    private final String FOOD = "\u2588\u2588";
-    private final String EMPTY = "  ";
+    private Integer width;
+    private Integer height;
     private Segment mainSegment;
     private Thread combo;
     private Thread comboMeter = new Thread(new Runnable() {
@@ -43,21 +43,15 @@ public class Snajk {
     private Thread input = new Thread(new Runnable() {
         @Override
         public void run() {
-            NonBlockingReader reader;
             try {
-                reader = terminal.reader();
                 if (reader != null) {
                     while (running) {
                         Integer value = reader.read();
                         if (value >= 65 && value <= 90) {
                             value += 32;
                         }
-                        if (value == 113 || value == 27) {
-                            running = false;
-                            reader.close();
-                            terminal.close();
-                            move.interrupt();
-                            System.exit(0);
+                        if (value == 112) {
+                            gover();
                         } else {
                             move(value);
                         }
@@ -74,60 +68,69 @@ public class Snajk {
             while (running) {
                 try {
                     Thread.sleep(delay);
-                } catch (InterruptedException e) {
+                    switch (direction) {
+                        case "L":
+                            if (mainSegment.getX() > 2) {
+                                mainSegment.setY(mainSegment.getY() + 0);
+                                mainSegment.setX(mainSegment.getX() - 2);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }
+                            break;
+                        case "R":
+                            if (mainSegment.getX() < (width*2)-2) {
+                                mainSegment.setY(mainSegment.getY() + 0);
+                                mainSegment.setX(mainSegment.getX() + 2);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }    
+                            break;
+                        case "U":
+                            if (mainSegment.getY() > 1) {
+                                mainSegment.setY(mainSegment.getY() - 1);
+                                mainSegment.setX(mainSegment.getX() + 0);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }
+                            break;
+                        case "D":
+                            if (mainSegment.getY() < height) {
+                                mainSegment.setY(mainSegment.getY() + 1);
+                                mainSegment.setX(mainSegment.getX() + 0);
+                                if (checkMove(mainSegment)) {
+                                    printSegment(mainSegment);
+                                } else {
+                                    gover();
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (InterruptedException | IOException e) {
                     System.out.print("GAME ENDED BY USER");
-                }
-                switch (direction) {
-                    case "L":
-                        if (mainSegment.getX() > 2) {
-                            mainSegment.setY(mainSegment.getY() + 0);
-                            mainSegment.setX(mainSegment.getX() - 2);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }
-                        break;
-                    case "R":
-                        if (mainSegment.getX() < (width*2)-2) {
-                            mainSegment.setY(mainSegment.getY() + 0);
-                            mainSegment.setX(mainSegment.getX() + 2);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }    
-                        break;
-                    case "U":
-                        if (mainSegment.getY() > 1) {
-                            mainSegment.setY(mainSegment.getY() - 1);
-                            mainSegment.setX(mainSegment.getX() + 0);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }
-                        break;
-                    case "D":
-                        if (mainSegment.getY() < height) {
-                            mainSegment.setY(mainSegment.getY() + 1);
-                            mainSegment.setX(mainSegment.getX() + 0);
-                            if (checkMove(mainSegment)) {
-                                printSegment(mainSegment);
-                            } else {
-                                gover();
-                            }
-                        }
-                        break;
-                    default:
-                        break;
                 }
             }
         }
     });
+
+    public Snajk(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize, Integer width, Integer height) {
+        this.terminal = terminal;
+        this.reader = reader;
+        this.logArea = logArea;
+        this.startupSize = startupSize;
+        this.width = width;
+        this.height = height;
+    }
 
     public void move(Integer key) {
         switch (key) {
@@ -168,7 +171,7 @@ public class Snajk {
         combo.start();
     }
 
-    public Boolean checkCollisionFood() {
+    public Boolean checkCollisionFood() throws IOException {
         Point toRemove = null;
         for (Point _point : food) {
             if (mainSegment.getX() == _point.getX() && mainSegment.getY() == _point.getY()) {
@@ -183,7 +186,7 @@ public class Snajk {
             comboInit();
         }
         if (food.size() == 0) {
-            gwin();
+            gover();
         }
         return true;
     }
@@ -204,41 +207,24 @@ public class Snajk {
         }
     }
 
-    public void gover() {
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
-        System.out.print("GOVER");
-        running = false;        
-        try {
-            terminal.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.input.interrupt();
-        this.move.interrupt();
-        System.exit(0);
+    public void gover() throws IOException {
+        running = false;
+        logArea.printToLogOverwritable("GAME OVER");
+        Menu menu = new Menu();
+        menu.init(terminal, reader, logArea, startupSize); 
     }
 
-    public void gwin() {
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 41));
-        System.out.print("GWIN");
-        running = false;        
-        try {
-            terminal.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.input.interrupt();
-        this.move.interrupt();
-        System.exit(0);
-    }
-
-    public boolean checkMove(Segment segment) {
+    public boolean checkMove(Segment segment) throws IOException {
         /*System.out.print(String.format("%c[%d;%df", 0x1B, 1, 1));
         System.out.print(mainSegment.getX() + " " + mainSegment.getY());*/
-        System.out.print(String.format("%c[%d;%df", 0x1B, width, 1));
-        System.out.print("SCR:" + this.score + " MLT: " + this.multiplier + "x");
-        if (segment.getX() <= 2 || segment.getX() >= (width*2)-2 || segment.getY() <= 1
-                || segment.getY() >= height) {
+
+        //update or move
+        System.out.print(String.format("%c[%d;%df", 0x1B, 4, (width*2)+9));
+        System.out.print("\u001B[37m" + this.score);
+        System.out.print(String.format("%c[%d;%df", 0x1B, 6, (width*2)+21));
+        System.out.print("\u001B[37m" + this.multiplier + "x");
+
+        if (segment.getX() <= 2 || segment.getX() >= (width*2)-2 || segment.getY() <= 1 || segment.getY() >= height-1) {
             return false;
         } else {
             Boolean selfCollision = checkCollisionSelf(mainSegment.getNext());
@@ -257,52 +243,33 @@ public class Snajk {
 
     public void printSegment(Segment segment) {
         if (segment != null) {
-            String col = "\u001B[32m";
+            String col = "\u001B[42m";
             if (segment == mainSegment) {
-                col = "\u001B[34m";
+                col = "\u001B[44m";
             }
-            printToXY(segment.getX(), segment.getY(), col + BLOCK, "fgr", "bgr");
+            printToXY(segment.getX(), segment.getY(), col + Symbol.EMPTY.value, "fgr", "bgr");
             if (segment.getNext() != null) {
                 Segment next = segment.getNext();
                 next.setX(segment.getPrevX());
                 next.setY(segment.getPrevY());
                 printSegment(next);
             } else {
-                printToXY(segment.getPrevX(), segment.getPrevY(), EMPTY, "fgr", "bgr");
+                printToXY(segment.getPrevX(), segment.getPrevY(), "\u001B[0m" + Symbol.EMPTY.value, "fgr", "bgr");
             }
         }
     }
 
-    public void start() {
-        this.running = true;
-        this.input.start();
-        this.move.start();
-    }
-
-    public void init() throws IOException {
-        terminal = TerminalBuilder.builder().build();
-        terminal.enterRawMode();
-        Integer w = terminal.getWidth();
-        Integer h = terminal.getHeight();
-        Integer res = w<h?w:h;
-        this.width = res - 1;
-        this.height = res - 1;
-        System.out.print(String.format("%c[%d;%df", 0x1B, 1, 1));
-        for (Integer y = 0; y < height; y++) {
-            for (Integer x = 0; x < width; x++) {
-                if (y == 0 || y == height-1) {
-                    System.out.print("\u001B[31m" + BLOCK);
-                } else {
-                    if (x == 0 || x == width-1) {
-                        System.out.print("\u001B[31m" + BLOCK);
-                    } else {
-                        System.out.print(EMPTY);
-                    }
-                }
+    public void generatePoints() {
+        while (food.size() < (width*height)*0.1) {
+            Integer x = new Random().nextInt(width*2 - 4) + 3;
+            Integer y = new Random().nextInt(height - 3) + 2;
+            Point newPoint = new Point(x, y);
+            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
+                food.add(newPoint);
+                System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
+                System.out.print("\u001B[43m" + Symbol.EMPTY.value);
             }
-            System.out.println();
         }
-        generatePoints();
     }
 
     public boolean startCollision(Point point) {
@@ -313,33 +280,22 @@ public class Snajk {
         }
     }
 
-    public void generatePoints() {
-        while (food.size() < (this.width*this.height)*0.1) {
-            Integer x = new Random().nextInt(this.width*2 - 4) + 2;
-            Integer y = new Random().nextInt(this.height - 2) + 2;
-            Point newPoint = new Point(x, y);
-            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
-                food.add(newPoint);
-                System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
-                System.out.print("\u001B[33m" + FOOD);
-            }
-        }
+    public void start() {
+        this.running = true;
+        this.input.start();
+        this.move.start();
     }
 
-    public static void main(String[] args) {
-        try {
-            Snajk snajk = new Snajk();
-            snajk.init();
-            snajk.mainSegment = new Segment(3, 2);
-            Segment initSegment = new Segment(3, 2);
-            initSegment.setPrev(snajk.mainSegment);
-            snajk.mainSegment.setNext(initSegment);
-            snajk.mainSegment.setX(5);
-            snajk.mainSegment.setY(2);
-            snajk.printSegment(snajk.mainSegment);
-            snajk.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void init() throws IOException {
+        logArea.printToLogOverwritable("GAME STARTED");
+        generatePoints(); 
+        this.mainSegment = new Segment(width-1, height/2);
+        Segment initSegment = new Segment(width-1, height/2);
+        initSegment.setPrev(this.mainSegment);
+        this.mainSegment.setNext(initSegment);
+        this.mainSegment.setX(width-3);
+        this.mainSegment.setY(height/2);
+        this.printSegment(this.mainSegment);
+        this.start();
     }
 }
