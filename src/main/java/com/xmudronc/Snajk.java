@@ -243,18 +243,18 @@ public class Snajk {
 
     public void printSegment(Segment segment) {
         if (segment != null) {
-            String col = "\u001B[32m";
+            String col = "\u001B[42m";
             if (segment == mainSegment) {
-                col = "\u001B[34m";
+                col = "\u001B[44m";
             }
-            printToXY(segment.getX(), segment.getY(), col + Symbol.BLOCK.value, "fgr", "bgr");
+            printToXY(segment.getX(), segment.getY(), col + Symbol.EMPTY.value, "fgr", "bgr");
             if (segment.getNext() != null) {
                 Segment next = segment.getNext();
                 next.setX(segment.getPrevX());
                 next.setY(segment.getPrevY());
                 printSegment(next);
             } else {
-                printToXY(segment.getPrevX(), segment.getPrevY(), Symbol.EMPTY.value, "fgr", "bgr");
+                printToXY(segment.getPrevX(), segment.getPrevY(), "\u001B[0m" + Symbol.EMPTY.value, "fgr", "bgr");
             }
         }
     }
@@ -267,7 +267,7 @@ public class Snajk {
             if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
                 food.add(newPoint);
                 System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
-                System.out.print("\u001B[33m" + Symbol.FOOD.value);
+                System.out.print("\u001B[43m" + Symbol.EMPTY.value);
             }
         }
     }
