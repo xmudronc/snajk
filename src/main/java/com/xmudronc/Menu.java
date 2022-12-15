@@ -70,6 +70,9 @@ public class Menu {
             case HIGH_SCORE:
                 scoreSelected();
                 break;
+            case OPTIONS:
+                optionsSelected();
+                break;
             case EXIT:
                 exitSelected();
                 break;
@@ -107,6 +110,12 @@ public class Menu {
         clearPlayArea();
         HighScore highScore = new HighScore(this.terminal, this.reader, this.logArea, this.startupSize, this.runSize);
         highScore.init();
+    }
+
+    public void optionsSelected() throws IOException {
+        clearPlayArea();
+        Options options = new Options(this.terminal, this.reader, this.logArea, this.startupSize, this.runSize);
+        options.init();
     }
 
     public void exitSelected() throws IOException {
@@ -211,21 +220,25 @@ public class Menu {
     public void prepareMenuOptions() {
         int x = runSize.getRows();
         int y = (runSize.getRows()/2)-5;
-        Option newGame = new Option(OptionId.NEW_GAME, new Point(x, y), "New Game");
-        Option highScore = new Option(OptionId.HIGH_SCORE ,new Point(x, y+5), "High Score");
-        Option exit = new Option(OptionId.EXIT, new Point(x, y+10), "Exit");
+        Option newGame = new Option(OptionId.NEW_GAME, new Point(x, y-4), "New Game");
+        Option highScore = new Option(OptionId.HIGH_SCORE ,new Point(x, y+1), "High Score");
+        Option options = new Option(OptionId.OPTIONS ,new Point(x, y+6), "Options");
+        Option exit = new Option(OptionId.EXIT, new Point(x, y+11), "Exit");
         newGame.setLinks(highScore, exit);
-        highScore.setLinks(exit, newGame);
-        exit.setLinks(newGame, highScore);
+        highScore.setLinks(options, newGame);
+        options.setLinks(exit, highScore);
+        exit.setLinks(newGame, options);
         selectedOption = newGame;
         newGame.select();
         highScore.deselect();
+        options.deselect();
         exit.deselect();
     }
 
     private enum OptionId {
         NEW_GAME,
         HIGH_SCORE,
+        OPTIONS,
         EXIT
     }
 
