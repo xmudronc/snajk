@@ -11,20 +11,19 @@ public class HighScore {
     private NonBlockingReader reader;
     private LogArea logArea;
     private Size startupSize;
-    private Integer width;
-    private Integer height;
+    private Size runSize;
 
-    public HighScore(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize, Integer width, Integer height) {
+    public HighScore(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize, Size runSize) {
         this.terminal = terminal;
         this.reader = reader;
         this.logArea = logArea;
         this.startupSize = startupSize;
-        this.width = width;
-        this.height = height;
+        this.runSize = runSize;
     }
 
     public void init() throws IOException {
-        Menu menu = new Menu();
-        menu.init(terminal, reader, logArea, startupSize); 
+        logArea.printToLogOverwritable("HIGH SCORE TBD");
+        Menu menu = new Menu(terminal, reader, startupSize, runSize);
+        menu.initPlayAreaOnly(logArea); 
     }
 }

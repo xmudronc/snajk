@@ -21,6 +21,7 @@ public class Snajk {
     private Terminal terminal;
     private LogArea logArea;
     private Size startupSize;
+    private Size runSize;
     private Boolean running = false;
     private String direction = "N";
     private int delay = 150;
@@ -123,13 +124,14 @@ public class Snajk {
         }
     });
 
-    public Snajk(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize, Integer width, Integer height) {
+    public Snajk(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize, Size runSize) {
         this.terminal = terminal;
         this.reader = reader;
         this.logArea = logArea;
         this.startupSize = startupSize;
-        this.width = width;
-        this.height = height;
+        this.runSize = runSize;
+        this.width = runSize.getRows();
+        this.height = runSize.getRows();
     }
 
     public void move(Integer key) {
@@ -210,8 +212,8 @@ public class Snajk {
     public void gover() throws IOException {
         running = false;
         logArea.printToLogOverwritable("GAME OVER");
-        Menu menu = new Menu();
-        menu.init(terminal, reader, logArea, startupSize); 
+        Menu menu = new Menu(terminal, reader, startupSize, runSize);
+        menu.initPlayAreaOnly(logArea); 
     }
 
     public boolean checkMove(Segment segment) throws IOException {
