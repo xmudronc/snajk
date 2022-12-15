@@ -4,13 +4,12 @@ import java.io.IOException;
 
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 
 public class Menu {
     private LogArea logArea;
     private Size startupSize;
-    private Size runSize = new Size(120, 40);
+    private Size runSize;
     private Terminal terminal;
     private NonBlockingReader reader;
     private Integer buttonWidth = 20;
@@ -34,6 +33,13 @@ public class Menu {
             }
         }
     });
+
+    public Menu(Terminal terminal, NonBlockingReader reader, Size startupSize, Size runSize) {
+        this.terminal = terminal;
+        this.reader = reader;
+        this.startupSize = startupSize;
+        this.runSize = runSize;
+    }
     
     private void moveCursor(Integer key) throws IOException {
         switch (key) {
@@ -93,13 +99,13 @@ public class Menu {
     
     public void snajkSelected() throws IOException {
         clearPlayArea();
-        Snajk snajk = new Snajk(this.terminal, this.reader, this.logArea, this.startupSize, runSize.getRows(), runSize.getRows());
+        Snajk snajk = new Snajk(this.terminal, this.reader, this.logArea, this.startupSize, this.runSize);
         snajk.init();
     }
 
     public void scoreSelected() throws IOException {
         clearPlayArea();
-        HighScore highScore = new HighScore(this.terminal, this.reader, this.logArea, this.startupSize, runSize.getRows(), runSize.getRows());
+        HighScore highScore = new HighScore(this.terminal, this.reader, this.logArea, this.startupSize, this.runSize);
         highScore.init();
     }
 
@@ -175,26 +181,18 @@ public class Menu {
         drawArea(fromY, toY, fromX, toX);
     }
 
-    public void init() throws IOException {
-        terminal = TerminalBuilder.builder().build();
-        terminal.enterRawMode();
-        startupSize = terminal.getSize();
-        resizeTerminal(runSize.getColumns(), runSize.getRows());
+    public void initWithLogArea() {
         clearGameArea();
-        reader = terminal.reader();
         logArea = new LogArea(89, 13, 26, 25);
-        init(terminal, reader, logArea, startupSize);
+        initPlayAreaOnly(logArea);
         drawScoreArea();
         drawLogArea();
         logArea.printToLog("UP:     W\nDOWN:   S\nLEFT:   A\nRIGHT:  D\n\nSELECT: RETURN\nQUIT:   P\n\n");
         logArea.printToLog("--------------------------\n");
     }
 
-    public void init(Terminal terminal, NonBlockingReader reader, LogArea logArea, Size startupSize) throws IOException {
-        this.terminal = terminal;
-        this.reader = reader;
+    public void initPlayAreaOnly(LogArea logArea) {
         this.logArea = logArea;
-        this.startupSize = startupSize;
         clearPlayArea();
         drawGameArea();
         drawMenu();
