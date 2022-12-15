@@ -226,7 +226,7 @@ public class Snajk {
         System.out.print(String.format("%c[%d;%df", 0x1B, 4, (width*2)+9));
         System.out.print("\u001B[37m" + this.score);
         System.out.print(String.format("%c[%d;%df", 0x1B, 6, (width*2)+21));
-        System.out.print("\u001B[37m" + this.multiplier + "x");
+        System.out.print("\u001B[37m" + this.multiplier + "x  ");
 
         if (segment.getX() <= 2 || segment.getX() >= (width*2)-2 || segment.getY() <= 1 || segment.getY() >= height-1) {
             return false;
