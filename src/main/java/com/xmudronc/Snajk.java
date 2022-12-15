@@ -27,6 +27,7 @@ public class Snajk {
     private int delay = 150;
     private Integer width;
     private Integer height;
+    private Segment startSegment;
     private Segment mainSegment;
     private Thread combo;
     private Thread comboMeter = new Thread(new Runnable() {
@@ -132,6 +133,7 @@ public class Snajk {
         this.runSize = runSize;
         this.width = runSize.getRows();
         this.height = runSize.getRows();
+        this.startSegment = new Segment(width-1, height/2);
     }
 
     public void move(Integer key) {
@@ -256,9 +258,19 @@ public class Snajk {
                 next.setY(segment.getPrevY());
                 printSegment(next);
             } else {
-                printToXY(segment.getPrevX(), segment.getPrevY(), "\u001B[0m" + Symbol.EMPTY.value, "fgr", "bgr");
+                if (segment.getPrevX() != null && segment.getPrevY() != null) {
+                    printToXY(segment.getPrevX(), segment.getPrevY(), "\u001B[0m" + Symbol.EMPTY.value, "fgr", "bgr");
+                }
             }
         }
+        System.out.print("\u001B[0m");
+    }
+
+    public boolean isPointInSafeArea(Point point) {
+        if (point.getX() < startSegment.getX()-5 && point.getX() > startSegment.getX()+5 && point.getY() < startSegment.getY()-2 && point.getY() > startSegment.getY()+2) {
+            return true;
+        } 
+        return false;
     }
 
     public void generatePoints() {
@@ -266,7 +278,7 @@ public class Snajk {
             Integer x = new Random().nextInt(width*2 - 4) + 3;
             Integer y = new Random().nextInt(height - 3) + 2;
             Point newPoint = new Point(x, y);
-            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint)) {
+            if (!food.contains(newPoint) && newPoint.getX() % 2 != 0 && !startCollision(newPoint) && !isPointInSafeArea(newPoint)) {
                 food.add(newPoint);
                 System.out.print(String.format("%c[%d;%df", 0x1B, newPoint.getY(), newPoint.getX()));
                 System.out.print("\u001B[43m" + Symbol.EMPTY.value);
@@ -291,12 +303,7 @@ public class Snajk {
     public void init() throws IOException {
         logArea.printToLogOverwritable("GAME STARTED");
         generatePoints(); 
-        this.mainSegment = new Segment(width-1, height/2);
-        Segment initSegment = new Segment(width-1, height/2);
-        initSegment.setPrev(this.mainSegment);
-        this.mainSegment.setNext(initSegment);
-        this.mainSegment.setX(width-3);
-        this.mainSegment.setY(height/2);
+        this.mainSegment = startSegment;
         this.printSegment(this.mainSegment);
         this.start();
     }
